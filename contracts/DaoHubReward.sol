@@ -21,7 +21,7 @@ contract DaoHubReward {
 
         // Verify the merkle proof
         bytes32 leaf = keccak256(
-            abi.encode(totalTasksClaim, streakClaim, msg.sender)
+            abi.encode(msg.sender, totalTasksClaim, streakClaim)
         );
         bytes32 root = DaoHubState(stateContractAddress).getRoot(daoAddress);
         require(MerkleProof.verify(proof, root, leaf));
