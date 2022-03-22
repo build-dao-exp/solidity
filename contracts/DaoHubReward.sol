@@ -3,37 +3,59 @@
 pragma solidity >=0.7.0 <0.9.0;
 import "./DaoHubState.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "hardhat/console.sol";
 
 // This contract can be extended for any type of reward contract -- ERC20, ERC721, etc.
 contract DaoHubReward {
-    address stateContractAddress;
-    address daoAddress;
-
-    modifier OnlyApprovedUser(
-        uint256 minTotalTasks,
-        uint256 minStreak,
-        bytes32[] memory proof,
-        uint256 totalTasksClaim,
-        uint256 streakClaim
-    ) {
-        // Verify that the sender's claim satisfies the required minTotalTasks and minStreaks
-        require((totalTasksClaim > minTotalTasks) && (streakClaim > minStreak));
-
-        // Verify the merkle proof
-        bytes32 leaf = keccak256(
-            abi.encode(msg.sender, totalTasksClaim, streakClaim)
-        );
-        bytes32 root = DaoHubState(stateContractAddress).getRoot(daoAddress);
-        require(MerkleProof.verify(proof, root, leaf));
-        _;
-    }
+    address public stateContractAddress;
+    address public daoAddress;
 
     constructor(address _stateContractAddress, address _daoAddress) {
         stateContractAddress = _stateContractAddress;
         daoAddress = _daoAddress;
     }
 
-    // function test(uint256 totalTasksClaim, uint256 streakClaim) public view returns (bytes32) {
-    //     return keccak256(abi.encode(totalTasksClaim, streakClaim, msg.sender));
-    // }
+    function verifyUserMetrics(
+        bytes32[] memory proof,
+        uint256 totalTasksClaim,
+        uint256 streakClaim,
+        uint256 dailyBitMap
+    ) public view returns (bool) {
+        bytes32 leaf = keccak256(
+            abi.encodePacked(
+                msg.sender,
+                totalTasksClaim,
+                streakClaim,
+                dailyBitMap
+            )
+        );
+        bytes32 root = DaoHubState(stateContractAddress).getRoot(daoAddress);
+        return MerkleProof.verify(proof, root, leaf);
+    }
+
+    function getCountOverEpoch(uint256 dailyBitMap, uint256 epoch)
+        public
+        pure
+        returns (uint256)
+    {
+        uint256 count = 0;
+        for (uint256 i = 0; i < epoch; i++) {
+            count += dailyBitMap & 1;
+            dailyBitMap >>= 1;
+        }
+        return count;
+    }
+
+    function getCurrentSreak(uint256 dailyBitMap)
+        public
+        pure
+        returns (uint256)
+    {
+        uint256 count = 0;
+        while (dailyBitMap & 1 == 1) {
+            count++;
+            dailyBitMap >>= 1;
+        }
+        return count;
+    }
 }
