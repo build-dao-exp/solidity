@@ -9,6 +9,7 @@ describe("DAOHub Milestone Awards", function () {
   let signers;
   let tree;
   let root;
+  let leaves;
 
   const walletKeys = [
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
@@ -47,7 +48,7 @@ describe("DAOHub Milestone Awards", function () {
   ];
 
   before(async () => {
-    const leaves = userData.map((v) =>
+    leaves = userData.map((v) =>
       ethers.utils.solidityKeccak256(
         ["address", "uint256", "uint256", "uint256"],
         [...v]
@@ -100,11 +101,7 @@ describe("DAOHub Milestone Awards", function () {
   it("Should allow a user to claim a 5-day streak with a 5-day max streak", async function () {
     // user 0 -- streak 5, total 5
     const initialBalance = await wallets[0].getBalance();
-    let leaf = ethers.utils.solidityKeccak256(
-      ["address", "uint256", "uint256", "uint256"],
-      userData[0]
-    );
-    let proof = tree.getHexProof(leaf);
+    let proof = tree.getHexProof(leaves[0]);
     await rewardImplementationContract.claimStreakReward(
       proof,
       userData[0][1],
@@ -119,11 +116,7 @@ describe("DAOHub Milestone Awards", function () {
   it("Should allow a user to claim a 5-day streak with a 7-day max streak", async function () {
     // user 1 -- streak 7, total 50
     const initialBalance = await wallets[1].getBalance();
-    let leaf = ethers.utils.solidityKeccak256(
-      ["address", "uint256", "uint256", "uint256"],
-      userData[1]
-    );
-    let proof = tree.getHexProof(leaf);
+    let proof = tree.getHexProof(leaves[1]);
     await rewardImplementationContract
       .connect(wallets[1])
       .claimStreakReward(
@@ -140,11 +133,7 @@ describe("DAOHub Milestone Awards", function () {
   it("Should allow a user to claim a 20-day streak with a 50-day max streak", async function () {
     // user 2 -- streak 50, total 105
     const initialBalance = await wallets[2].getBalance();
-    let leaf = ethers.utils.solidityKeccak256(
-      ["address", "uint256", "uint256", "uint256"],
-      userData[2]
-    );
-    let proof = tree.getHexProof(leaf);
+    let proof = tree.getHexProof(leaves[2]);
     await rewardImplementationContract
       .connect(wallets[2])
       .claimStreakReward(
@@ -160,11 +149,7 @@ describe("DAOHub Milestone Awards", function () {
 
   it("Should not allow a user to claim a 5-day streak with a 0-day max streak", async function () {
     // user 3 -- streak 0, total 0
-    let leaf = ethers.utils.solidityKeccak256(
-      ["address", "uint256", "uint256", "uint256"],
-      userData[3]
-    );
-    let proof = tree.getHexProof(leaf);
+    let proof = tree.getHexProof(leaves[3]);
     try {
       await rewardImplementationContract
         .connect(wallets[3])
@@ -183,11 +168,7 @@ describe("DAOHub Milestone Awards", function () {
 
   it("Should not allow a user to claim a 5-day streak twice", async function () {
     // user 2 -- streak 50, total 105
-    let leaf = ethers.utils.solidityKeccak256(
-      ["address", "uint256", "uint256", "uint256"],
-      userData[2]
-    );
-    let proof = tree.getHexProof(leaf);
+    let proof = tree.getHexProof(leaves[2]);
     // first claim
     await rewardImplementationContract
       .connect(wallets[2])
@@ -215,9 +196,99 @@ describe("DAOHub Milestone Awards", function () {
     }
   });
 
-  //   it("Should allow a user to claim a 1-total-task reward with 5 total tasks completed", async function () {});
-  //   it("Should allow a user to claim a 50-total-task reward with 50 total tasks completed", async function () {});
-  //   it("Should allow a user to claim a 20-total-task reward with 50 total tasks completed", async function () {});
-  //   it("Should not allow a user to claim a 1-total-task reward with 0 total tasks completed", async function () {});
-  //   it("Should not allow a user to claim a 1-total-task reward twice", async function () {});
+  it("Should allow a user to claim a 1-total-task reward with 5 total tasks completed", async function () {
+    // user 0 -- streak 5, total 5
+    const initialBalance = await wallets[0].getBalance();
+    let proof = tree.getHexProof(leaves[0]);
+    await rewardImplementationContract.claimTotalTaskReward(
+      proof,
+      userData[0][1],
+      userData[0][2],
+      userData[0][3],
+      1
+    );
+    const newBalance = await wallets[0].getBalance();
+    assert(newBalance.gt(initialBalance));
+  });
+
+  it("Should allow a user to claim both a 20-total-task reward and a 50-total-task reward with 50 total tasks completed", async function () {
+    // user 1 -- streak 7, total 50
+    const initialBalance = await wallets[1].getBalance();
+    let proof = tree.getHexProof(leaves[1]);
+
+    // claim 20 reward
+    await rewardImplementationContract
+      .connect(wallets[1])
+      .claimTotalTaskReward(
+        proof,
+        userData[1][1],
+        userData[1][2],
+        userData[1][3],
+        20
+      );
+    const nextBalance = await wallets[1].getBalance();
+    assert(nextBalance.gt(initialBalance));
+
+    // claim 50 reward
+    await rewardImplementationContract
+      .connect(wallets[1])
+      .claimTotalTaskReward(
+        proof,
+        userData[1][1],
+        userData[1][2],
+        userData[1][3],
+        50
+      );
+    const finalBalance = await wallets[1].getBalance();
+    assert(finalBalance.gt(nextBalance));
+  });
+
+  it("Should not allow a user to claim a 1-total-task reward with 0 total tasks completed", async function () {
+    // user 3 -- streak 0, total 0
+    let proof = tree.getHexProof(leaves[3]);
+    try {
+      await rewardImplementationContract
+        .connect(wallets[3])
+        .claimTotalTaskReward(
+          proof,
+          userData[3][1],
+          userData[3][2],
+          userData[3][3],
+          1
+        );
+      assert(false);
+    } catch (err) {
+      assert(err);
+    }
+  });
+
+  it("Should not allow a user to claim a 1-total-task reward twice", async function () {
+    // user 2 -- streak 50, total 105
+    let proof = tree.getHexProof(leaves[2]);
+    // first claim
+    await rewardImplementationContract
+      .connect(wallets[2])
+      .claimTotalTaskReward(
+        proof,
+        userData[2][1],
+        userData[2][2],
+        userData[2][3],
+        1
+      );
+    // second claim
+    try {
+      await rewardImplementationContract
+        .connect(wallets[2])
+        .claimTotalTaskReward(
+          proof,
+          userData[2][1],
+          userData[2][2],
+          userData[2][3],
+          1
+        );
+      assert(false);
+    } catch (err) {
+      assert(err);
+    }
+  });
 });
