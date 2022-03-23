@@ -83,7 +83,7 @@ describe("General DAOHub Rewards", function () {
       userData[0]
     );
     let proof = tree.getHexProof(leaf);
-    let res = await rewardContract.verifyUserMetrics(
+    let res = await rewardContract._verifyUserMetrics(
       proof,
       userData[0][1],
       userData[0][2],
@@ -109,7 +109,7 @@ describe("General DAOHub Rewards", function () {
     let falseProof = tree.getHexProof(falseLeaf);
 
     assert(
-      !(await rewardContract.verifyUserMetrics(
+      !(await rewardContract._verifyUserMetrics(
         goodProof,
         falseData[1],
         falseData[2],
@@ -117,7 +117,7 @@ describe("General DAOHub Rewards", function () {
       ))
     );
     assert(
-      !(await rewardContract.verifyUserMetrics(
+      !(await rewardContract._verifyUserMetrics(
         falseProof,
         falseData[1],
         falseData[2],
@@ -131,10 +131,16 @@ describe("General DAOHub Rewards", function () {
     const dailyMetrics2 = parseInt("11111111111111111", 2);
     const dailyMetrics3 = parseInt("000000000000000", 2);
 
-    assert.equal(3, await rewardContract.getCountOverEpoch(dailyMetrics1, "3"));
-    assert.equal(6, await rewardContract.getCountOverEpoch(dailyMetrics1, 9));
-    assert.equal(10, await rewardContract.getCountOverEpoch(dailyMetrics2, 10));
-    assert.equal(0, await rewardContract.getCountOverEpoch(dailyMetrics3, 3));
+    assert.equal(
+      3,
+      await rewardContract._getCountOverEpoch(dailyMetrics1, "3")
+    );
+    assert.equal(6, await rewardContract._getCountOverEpoch(dailyMetrics1, 9));
+    assert.equal(
+      10,
+      await rewardContract._getCountOverEpoch(dailyMetrics2, 10)
+    );
+    assert.equal(0, await rewardContract._getCountOverEpoch(dailyMetrics3, 3));
   });
 
   it("Should get the correct current streak", async function () {
@@ -142,11 +148,11 @@ describe("General DAOHub Rewards", function () {
     const dailyMetrics2 = parseInt("11111111111111111", 2);
     const dailyMetrics3 = parseInt("000000000000000", 2);
 
-    assert.equal(3, await rewardContract.getCurrentSreak(dailyMetrics1));
+    assert.equal(3, await rewardContract._getCurrentSreak(dailyMetrics1));
     assert.equal(
       dailyMetrics2.toString(2).length,
-      await rewardContract.getCurrentSreak(dailyMetrics2)
+      await rewardContract._getCurrentSreak(dailyMetrics2)
     );
-    assert.equal(0, await rewardContract.getCurrentSreak(dailyMetrics3));
+    assert.equal(0, await rewardContract._getCurrentSreak(dailyMetrics3));
   });
 });

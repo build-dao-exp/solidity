@@ -5,14 +5,15 @@ import "./DaoHubReward.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MyDaoMilestoneRewards is DaoHubReward, Ownable {
-    mapping(uint256 => uint256) public streakRewards;
-    mapping(uint256 => mapping(address => bool)) public streakRewardLogs;
-    mapping(uint256 => uint256) public totalTaskRewards;
-    mapping(uint256 => mapping(address => bool)) public totalTaskRewardLogs;
+    mapping(uint256 => uint256) public streakRewards; // streak length => amount of wei to award
+    mapping(uint256 => mapping(address => bool)) public streakRewardLogs; // streak length => (address => have they claimed their reward?)
+    mapping(uint256 => uint256) public totalTaskRewards; // number of tasks => amount of wei to award
+    mapping(uint256 => mapping(address => bool)) public totalTaskRewardLogs; // number of tasks => (address => have they claimed their reward?)
 
     constructor(address _stateContractAddress, address _daoAddress)
         DaoHubReward(_stateContractAddress, _daoAddress)
     {
+        // Initialize various rewards based on certain milestones
         streakRewards[5] = 0.1 * (10**18);
         streakRewards[10] = 0.2 * (10**18);
         streakRewards[20] = 0.5 * (10**18);
@@ -41,6 +42,10 @@ contract MyDaoMilestoneRewards is DaoHubReward, Ownable {
             dailyBitMap
         )
     {
+        require(
+            !streakRewardLogs[streakReward][msg.sender],
+            "Reward already claimed"
+        );
         (bool sent, ) = msg.sender.call{value: streakRewards[streakReward]}("");
         require(sent, "Failed to send Ether");
         streakRewardLogs[streakReward][msg.sender] = true;
@@ -62,6 +67,10 @@ contract MyDaoMilestoneRewards is DaoHubReward, Ownable {
             dailyBitMap
         )
     {
+        require(
+            !totalTaskRewardLogs[totalTaskReward][msg.sender],
+            "Reward already claimed"
+        );
         (bool sent, ) = msg.sender.call{
             value: totalTaskRewards[totalTaskReward]
         }("");

@@ -7,9 +7,12 @@ import "hardhat/console.sol";
 
 // This contract can be extended for any type of reward contract -- ERC20, ERC721, etc.
 contract DaoHubReward {
-    address public stateContractAddress;
-    address public daoAddress;
+    address public stateContractAddress; // address of the contract storing the Merkle root of the reward state
+    address public daoAddress; // the DAO issuing rewards through this contract... likely a multisig address
 
+    // to gate functions based on users who have completed a certain number of tasks
+    // @param minTask: the min number of tasks a user must have completed
+    // @param totalTasksClaim: the actual number of tasks a user has completed, which is verified by Merkle proof
     modifier RequiresMinTotalTasks(
         uint256 minTask,
         bytes32[] memory proof,
@@ -29,6 +32,9 @@ contract DaoHubReward {
         _;
     }
 
+    // to gate functions based on users who have reached a certain streak length
+    // @param minLongestStreak: the min streak a user must have achieved
+    // @param streakClaim: the actual longest streak a user has achieved, which is verified by the Merkle proof
     modifier RequiresMinLongestStreak(
         uint256 minLongestStreak,
         bytes32[] memory proof,
@@ -48,6 +54,9 @@ contract DaoHubReward {
         _;
     }
 
+    // to gate functions based on users who have completed a certain number of tasks during a certain period
+    // @param epochTaskCount: the min number of tasks the user must have completed over the epoch
+    // @param epochLength: the number of days over which the user must have completed these tasks
     modifier RequiresTasksDuringEpoch(
         uint256 epochTaskCount,
         uint256 epochLength,
@@ -68,6 +77,8 @@ contract DaoHubReward {
         _;
     }
 
+    // to gate functions based on users who have completed a certain number of tasks during the past X days
+    // @param minCurrentStreak: the min current streak a user must have, which is verified by the dailyBitMap and the Merkle proof
     modifier RequiresCurrentStreak(
         uint256 minCurrentStreak,
         bytes32[] memory proof,

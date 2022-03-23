@@ -1,7 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 
 module.exports = {
-  defaultNetwork: "rinkeby",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {},
   },

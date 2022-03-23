@@ -160,10 +160,11 @@ describe("DAOHub Milestone Awards", function () {
           userData[3][3],
           5
         );
-      assert(false);
     } catch (err) {
       assert(err);
+      return;
     }
+    assert(false);
   });
 
   it("Should not allow a user to claim a 5-day streak twice", async function () {
@@ -190,10 +191,11 @@ describe("DAOHub Milestone Awards", function () {
           userData[2][3],
           20
         );
-      assert(false);
     } catch (err) {
       assert(err);
+      return;
     }
+    assert(false);
   });
 
   it("Should allow a user to claim a 1-total-task reward with 5 total tasks completed", async function () {
@@ -256,10 +258,11 @@ describe("DAOHub Milestone Awards", function () {
           userData[3][3],
           1
         );
-      assert(false);
     } catch (err) {
-      assert(err);
+      assert(err, "failed");
+      return;
     }
+    assert(false);
   });
 
   it("Should not allow a user to claim a 1-total-task reward twice", async function () {
@@ -286,9 +289,10 @@ describe("DAOHub Milestone Awards", function () {
           userData[2][3],
           1
         );
-      assert(false);
     } catch (err) {
       assert(err);
+      return;
     }
+    assert(false);
   });
 });
