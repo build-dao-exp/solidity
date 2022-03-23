@@ -1,6 +1,6 @@
 {
   "name": "Compound 100 Tasks Completed",
   "description": "Completed 100 total tasks for Compound.",
-  "image": "www.",
+  "image": "https://raw.githubusercontent.com/build-dao-exp/solidity/main/tokens/daoNftImages/task100.png",
   "properties": {}
 }
