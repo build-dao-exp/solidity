@@ -56,10 +56,10 @@ contract MyDaoMilestoneNFTRewards is DaoHubReward, ERC1155, Ownable {
             streakTokenIds[streakReward] != 0,
             "There's no NFT award for this streak."
         );
-        require(
-            balanceOf(msg.sender, streakTokenIds[streakReward]) == 0,
-            "NFT already claimed."
-        );
+        // require(
+        //     balanceOf(msg.sender, streakTokenIds[streakReward]) == 0,
+        //     "NFT already claimed."
+        // );
         _mint(msg.sender, streakTokenIds[streakReward], 1, "");
     }
 
@@ -83,10 +83,10 @@ contract MyDaoMilestoneNFTRewards is DaoHubReward, ERC1155, Ownable {
             totalTaskTokenIds[totalTaskReward] != 0,
             "There's no NFT award for this total task count."
         );
-        require(
-            balanceOf(msg.sender, totalTaskTokenIds[totalTaskReward]) == 0,
-            "NFT already claimed."
-        );
+        // require(
+        //     balanceOf(msg.sender, totalTaskTokenIds[totalTaskReward]) == 0,
+        //     "NFT already claimed."
+        // );
         _mint(msg.sender, totalTaskTokenIds[totalTaskReward], 1, "");
     }
 

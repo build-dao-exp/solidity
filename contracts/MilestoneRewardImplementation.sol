@@ -42,10 +42,10 @@ contract MyDaoMilestoneRewards is DaoHubReward, Ownable {
             dailyBitMap
         )
     {
-        require(
-            !streakRewardLogs[streakReward][msg.sender],
-            "Reward already claimed"
-        );
+        // require(
+        //     !streakRewardLogs[streakReward][msg.sender],
+        //     "Reward already claimed"
+        // );
         (bool sent, ) = msg.sender.call{value: streakRewards[streakReward]}("");
         require(sent, "Failed to send Ether");
         streakRewardLogs[streakReward][msg.sender] = true;
@@ -67,10 +67,10 @@ contract MyDaoMilestoneRewards is DaoHubReward, Ownable {
             dailyBitMap
         )
     {
-        require(
-            !totalTaskRewardLogs[totalTaskReward][msg.sender],
-            "Reward already claimed"
-        );
+        // require(
+        //     !totalTaskRewardLogs[totalTaskReward][msg.sender],
+        //     "Reward already claimed"
+        // );
         (bool sent, ) = msg.sender.call{
             value: totalTaskRewards[totalTaskReward]
         }("");
